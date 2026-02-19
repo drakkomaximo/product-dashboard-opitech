@@ -1,0 +1,13 @@
+@import 'tailwindcss';
+
+:root {
+  color-scheme: light dark;
+}
+
+body {
+  @apply bg-slate-950 text-slate-50 antialiased;
+}
+
+a {
+  @apply text-sky-400 hover:text-sky-300 underline underline-offset-4;
+}
