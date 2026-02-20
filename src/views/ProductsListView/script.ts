@@ -17,6 +17,9 @@ export function useProductsList() {
   const page = ref(1)
   const pageSize = ref(DEFAULT_PAGE_SIZE)
 
+  const searchTerm = ref('')
+  const selectedCategory = ref<string | null>(null)
+
   const totalPages = computed(() => {
     if (total.value === 0) return 1
     return Math.ceil(total.value / pageSize.value)
@@ -30,8 +33,8 @@ export function useProductsList() {
       const result = await getProductsUseCase.execute({
         page: page.value,
         pageSize: pageSize.value,
-        searchTerm: undefined,
-        category: undefined,
+        searchTerm: searchTerm.value.trim() || undefined,
+        category: selectedCategory.value || undefined,
       })
 
       products.value = result.items
@@ -69,8 +72,11 @@ export function useProductsList() {
     errorMessage,
     page,
     pageSize,
+    searchTerm,
+    selectedCategory,
     totalPages,
     goToPreviousPage,
     goToNextPage,
+    loadProducts,
   }
 }
