@@ -10,9 +10,7 @@
     </header>
 
     <Transition name="fade" mode="out-in">
-      <template v-if="isLoading">
-        <ProductDetailSkeleton />
-      </template>
+      <ProductDetailSkeleton v-if="isLoading" />
 
       <ErrorWithRetry v-else-if="errorMessage" :message="errorMessage" @retry="onRetry" />
 
