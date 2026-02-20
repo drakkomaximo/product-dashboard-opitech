@@ -12,8 +12,12 @@ test('loads products dashboard home with header and products section', async ({ 
 test('renders product detail view for a product', async ({ page }) => {
   await page.goto('/products/1')
 
-  // La vista de detalle siempre muestra este enlace en el header
+  // Detail view always shows this navigation link in the header
   await expect(page.getByRole('link', { name: 'Back to products' })).toBeVisible()
+
+  // Assert that product-specific content is rendered (title and price)
+  await expect(page.getByRole('heading', { level: 2 })).toBeVisible()
+  await expect(page.getByText(/\$/)).toBeVisible()
 })
 
 test('shows not-found view for unknown routes and allows returning to products', async ({ page }) => {
