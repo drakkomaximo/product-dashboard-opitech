@@ -16,7 +16,7 @@ const props = defineProps<{
   variant?: 'default' | 'error'
 }>()
 
-const { isError, role, ariaLive } = useAlertMessageScript(props.variant)
+const { isError, role, ariaLive } = useAlertMessageScript(() => props.variant)
 
 defineOptions({
   name: 'AlertMessage',

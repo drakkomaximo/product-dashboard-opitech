@@ -48,6 +48,10 @@ export function useProductsFiltersScript(options: ProductsFiltersOptions) {
   }
 
   function resetFilters() {
+    if (searchDebounceTimeout !== undefined) {
+      window.clearTimeout(searchDebounceTimeout)
+      searchDebounceTimeout = undefined
+    }
     searchTermLocal.value = ''
     selectedCategoryLocal.value = null
     options.emitUpdateSearchTerm('')

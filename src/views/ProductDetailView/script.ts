@@ -4,11 +4,19 @@ import type { Product } from '@/domain/product'
 import { AxiosProductsRepository } from '@/infrastructure/http/AxiosProductsRepository'
 import { GetProductDetailUseCase } from '@/application/use-cases/GetProductDetailUseCase'
 
+const productDetailRepository = new AxiosProductsRepository()
+const getProductDetailUseCase = new GetProductDetailUseCase(productDetailRepository)
+
+function getProductDetailErrorMessage(status?: number): string {
+  if (status && status >= 500) {
+    return 'There was a server error while loading this product. Please try again.'
+  }
+
+  return 'Failed to load product details. Please check your connection and try again.'
+}
+
 export function useProductDetail() {
   const route = useRoute()
-
-  const repository = new AxiosProductsRepository()
-  const getProductDetailUseCase = new GetProductDetailUseCase(repository)
 
   const product = ref<Product | null>(null)
   const isLoading = ref(false)
@@ -35,11 +43,7 @@ export function useProductDetail() {
       const maybeWithStatus = error as { response?: { status?: number } }
       const status = maybeWithStatus.response?.status
 
-      if (status && status >= 500) {
-        errorMessage.value = 'There was a server error while loading this product. Please try again.'
-      } else {
-        errorMessage.value = 'Failed to load product details. Please check your connection and try again.'
-      }
+      errorMessage.value = getProductDetailErrorMessage(status)
       product.value = null
     } finally {
       isLoading.value = false

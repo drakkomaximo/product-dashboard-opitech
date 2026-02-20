@@ -4,9 +4,18 @@ import { DEFAULT_PAGE_SIZE } from '@/config/constants'
 import { AxiosProductsRepository } from '@/infrastructure/http/AxiosProductsRepository'
 import { GetProductsUseCase } from '@/application/use-cases/GetProductsUseCase'
 
+const productsListRepository = new AxiosProductsRepository()
+const getProductsUseCase = new GetProductsUseCase(productsListRepository)
+
+function getProductsErrorMessage(status?: number): string {
+  if (status && status >= 500) {
+    return 'There was a server error while loading products. Please try again.'
+  }
+
+  return 'Failed to load products. Please check your connection and try again.'
+}
+
 export function useProductsList() {
-  const repository = new AxiosProductsRepository()
-  const getProductsUseCase = new GetProductsUseCase(repository)
 
   const products = ref<Product[]>([])
   const total = ref(0)
@@ -48,11 +57,7 @@ export function useProductsList() {
       const maybeWithStatus = error as { response?: { status?: number } }
       const status = maybeWithStatus.response?.status
 
-      if (status && status >= 500) {
-        errorMessage.value = 'There was a server error while loading products. Please try again.'
-      } else {
-        errorMessage.value = 'Failed to load products. Please check your connection and try again.'
-      }
+      errorMessage.value = getProductsErrorMessage(status)
     } finally {
       isLoading.value = false
     }

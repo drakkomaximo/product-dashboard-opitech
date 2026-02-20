@@ -16,7 +16,6 @@ function similarityScore(source: string, target: string): number {
 
   if (!a.length || !b.length) return 0
 
-  // Simple overlap-based similarity: caracteres en común sobre longitud máxima
   const aSet = new Set(a)
   const bSet = new Set(b)
   let common = 0
@@ -38,7 +37,7 @@ export class AxiosProductsRepository implements ProductsRepository {
     categories: string[]
     usedFuzzySearch: boolean
   }> {
-    if (Math.random() < PRODUCTS_SIMULATED_ERROR_RATE) {
+    if (import.meta.env.MODE !== 'production' && Math.random() < PRODUCTS_SIMULATED_ERROR_RATE) {
       const error = new Error('Simulated server error') as Error & { response?: { status: number } }
       error.response = { status: 500 }
       throw error
@@ -68,29 +67,24 @@ export class AxiosProductsRepository implements ProductsRepository {
     let filtered: Product[] = exactFiltered
     let usedFuzzySearch = false
 
-    // Si no hay resultados exactos pero hay término de búsqueda, intentar coincidencias difusas
     if (filtered.length === 0 && normalizedSearch) {
-      filtered = allProducts
-        .filter((product) => {
+      const scoredCandidates = allProducts
+        .map((product) => {
           const matchesCategory = category ? product.category === category : true
-          if (!matchesCategory) return false
+          if (!matchesCategory) {
+            return { product, score: 0 }
+          }
 
-          // Considerar tanto el título como la categoría para la similitud global
           const titleScore = similarityScore(product.title, normalizedSearch)
           const categoryScore = similarityScore(product.category, normalizedSearch)
           const score = Math.max(titleScore, categoryScore)
-          return score >= SEARCH_FUZZY_MIN_SIMILARITY
-        })
-        .sort((a, b) => {
-          const scoreATitle = similarityScore(a.title, normalizedSearch)
-          const scoreACategory = similarityScore(a.category, normalizedSearch)
-          const scoreA = Math.max(scoreATitle, scoreACategory)
 
-          const scoreBTitle = similarityScore(b.title, normalizedSearch)
-          const scoreBCategory = similarityScore(b.category, normalizedSearch)
-          const scoreB = Math.max(scoreBTitle, scoreBCategory)
-          return scoreB - scoreA
+          return { product, score }
         })
+        .filter(({ score }) => score >= SEARCH_FUZZY_MIN_SIMILARITY)
+        .sort((a, b) => b.score - a.score)
+
+      filtered = scoredCandidates.map(({ product }) => product)
       usedFuzzySearch = filtered.length > 0
     }
 
@@ -105,7 +99,7 @@ export class AxiosProductsRepository implements ProductsRepository {
   }
 
   async getProductById(id: ProductId): Promise<Product> {
-    if (Math.random() < PRODUCTS_SIMULATED_ERROR_RATE) {
+    if (import.meta.env.MODE !== 'production' && Math.random() < PRODUCTS_SIMULATED_ERROR_RATE) {
       const error = new Error('Simulated server error') as Error & { response?: { status: number } }
       error.response = { status: 500 }
       throw error
