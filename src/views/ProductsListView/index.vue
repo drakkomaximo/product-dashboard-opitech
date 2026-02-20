@@ -11,12 +11,12 @@
       </div>
     </header>
 
-    <div v-if="errorMessage" class="rounded-md border border-red-500/40 bg-red-950/40 px-4 py-3 text-sm">
-      {{ errorMessage }}
-    </div>
-
     <div v-if="isLoading" class="grid place-items-center py-16 text-slate-400">
       <span>Loading products...</span>
+    </div>
+
+    <div v-else-if="errorMessage" class="rounded-md border border-red-500/40 bg-red-950/40 px-4 py-3 text-sm">
+      {{ errorMessage }}
     </div>
 
     <div v-else class="space-y-6">
@@ -28,7 +28,7 @@
       <div v-else class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <article v-for="product in products" :key="product.id"
           class="flex flex-col overflow-hidden rounded-lg border border-slate-800 bg-slate-900/60">
-          <div class="aspect-[4/3] bg-slate-900">
+          <div class="aspect-4/3 bg-slate-900">
             <img :src="product.image" :alt="product.title" class="h-full w-full object-cover" loading="lazy" />
           </div>
           <div class="flex flex-1 flex-col gap-2 px-4 py-3">

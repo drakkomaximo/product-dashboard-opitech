@@ -1,4 +1,4 @@
-import { onMounted, ref } from 'vue'
+import { ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import type { Product } from '@/domain/product'
 import { AxiosProductsRepository } from '@/infrastructure/http/AxiosProductsRepository'
@@ -15,6 +15,7 @@ export function useProductDetail() {
   const errorMessage = ref<string | null>(null)
 
   async function loadProduct() {
+    product.value = null
     const idParam = route.params.id
     const id = Number(idParam)
 
@@ -31,14 +32,19 @@ export function useProductDetail() {
     } catch (error: unknown) {
       console.error('Failed to load product details', error as Error)
       errorMessage.value = 'Failed to load product details. Please try again.'
+      product.value = null
     } finally {
       isLoading.value = false
     }
   }
 
-  onMounted(() => {
-    void loadProduct()
-  })
+  watch(
+    () => route.params.id,
+    () => {
+      void loadProduct()
+    },
+    { immediate: true },
+  )
 
   return {
     product,
