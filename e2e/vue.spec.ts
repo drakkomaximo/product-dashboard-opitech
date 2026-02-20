@@ -26,7 +26,7 @@ test('shows not-found view for unknown routes and allows returning to products',
 
   await backLink.click()
 
-  await expect(page.getByRole('heading', { name: 'Products' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Products', level: 2 })).toBeVisible()
 })
 
 test('shows and clears filters using the Reset filters button', async ({ page }) => {

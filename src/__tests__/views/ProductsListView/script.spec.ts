@@ -102,12 +102,12 @@ describe('useProductsList', () => {
   })
 
   it('goToPreviousPage does not go below 1 and goToNextPage respects totalPages', async () => {
-    executeMock.mockResolvedValueOnce({
+    executeMock.mockImplementation(async () => ({
       items: [],
       total: DEFAULT_PAGE_SIZE * 2,
       categories: [],
       usedFuzzySearch: false,
-    })
+    }))
 
     const { page, totalPages, loadProducts, goToPreviousPage, goToNextPage } = useProductsList()
 
