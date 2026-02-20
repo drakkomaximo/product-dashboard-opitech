@@ -7,13 +7,13 @@
     <div class="flex gap-2">
       <button type="button"
         class="rounded-md border border-slate-700 px-3 py-1 disabled:cursor-not-allowed disabled:opacity-50"
-        :disabled="page <= 1 || disabled" :aria-disabled="page <= 1 || disabled" @click="$emit('previous')"
+        :disabled="page <= 1 || isDisabled" :aria-disabled="page <= 1 || isDisabled" @click="$emit('previous')"
         aria-label="Go to previous page">
         Previous
       </button>
       <button type="button"
         class="rounded-md border border-slate-700 px-3 py-1 disabled:cursor-not-allowed disabled:opacity-50"
-        :disabled="page >= totalPages || disabled" :aria-disabled="page >= totalPages || disabled"
+        :disabled="page >= totalPages || isDisabled" :aria-disabled="page >= totalPages || isDisabled"
         @click="$emit('next')" aria-label="Go to next page">
         Next
       </button>
@@ -22,13 +22,14 @@
 </template>
 
 <script setup lang="ts">
+import { computed, toRefs } from 'vue'
+
 const props = defineProps<{
   page: number
   totalPages: number
   disabled?: boolean
 }>()
 
-const page = props.page
-const totalPages = props.totalPages
-const disabled = props.disabled ?? false
+const { page, totalPages, disabled: disabledProp } = toRefs(props)
+const isDisabled = computed(() => disabledProp?.value ?? false)
 </script>

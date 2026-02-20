@@ -1,6 +1,8 @@
 export const DEFAULT_PAGE_SIZE = 12
 export const PRODUCTS_CACHE_TTL_MS = 5 * 60 * 1000
 
+export const SEARCH_DEBOUNCE_MS = 300
+
 export const ROUTE_NAMES = {
   productsList: 'products-list',
   productDetail: 'product-detail',

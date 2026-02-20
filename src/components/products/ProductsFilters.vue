@@ -29,6 +29,7 @@
 
 <script setup lang="ts">
 import { ref, watch } from 'vue'
+import { SEARCH_DEBOUNCE_MS } from '@/config/constants'
 
 const props = defineProps<{
   searchTerm: string
@@ -43,6 +44,8 @@ const emit = defineEmits<{
 
 const searchTermLocal = ref(props.searchTerm)
 const selectedCategoryLocal = ref<string | null>(props.selectedCategory)
+
+let searchDebounceTimeout: number | undefined
 
 watch(
   () => props.searchTerm,
@@ -60,7 +63,13 @@ watch(
 
 function onSearchChange(value: string) {
   searchTermLocal.value = value
-  emit('update:searchTerm', value)
+  if (searchDebounceTimeout !== undefined) {
+    window.clearTimeout(searchDebounceTimeout)
+  }
+
+  searchDebounceTimeout = window.setTimeout(() => {
+    emit('update:searchTerm', value)
+  }, SEARCH_DEBOUNCE_MS)
 }
 
 function onCategoryChange(value: string) {
