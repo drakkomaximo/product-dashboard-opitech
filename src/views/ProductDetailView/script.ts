@@ -40,7 +40,6 @@ export function useProductDetail() {
 
       product.value = await getProductDetailUseCase.execute(id)
     } catch (error: unknown) {
-      console.error('Failed to load product details', error as Error)
 
       const maybeWithStatus = error as { response?: { status?: number } }
       const status = maybeWithStatus.response?.status

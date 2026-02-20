@@ -1,8 +1,44 @@
 import { test, expect } from '@playwright/test'
 
-// See here how to get started:
-// https://playwright.dev/docs/intro
-test('visits the app root url', async ({ page }) => {
+const EXPECTED_HEADER_TITLE = 'Products Dashboard'
+
+test('loads products dashboard home with header and products section', async ({ page }) => {
   await page.goto('/')
-  await expect(page.locator('h1')).toHaveText('You did it!')
+
+  await expect(page.locator('header h1')).toHaveText(EXPECTED_HEADER_TITLE)
+  await expect(page.getByRole('heading', { name: 'Products', level: 2 })).toBeVisible()
+})
+
+test('renders product detail view for a product', async ({ page }) => {
+  await page.goto('/products/1')
+
+  // La vista de detalle siempre muestra este enlace en el header
+  await expect(page.getByRole('link', { name: 'Back to products' })).toBeVisible()
+})
+
+test('shows not-found view for unknown routes and allows returning to products', async ({ page }) => {
+  await page.goto('/this-route-does-not-exist')
+
+  await expect(page.getByRole('heading', { name: 'Page not found' })).toBeVisible()
+
+  const backLink = page.getByRole('link', { name: 'Back to products' })
+  await expect(backLink).toBeVisible()
+
+  await backLink.click()
+
+  await expect(page.getByRole('heading', { name: 'Products' })).toBeVisible()
+})
+
+test('shows and clears filters using the Reset filters button', async ({ page }) => {
+  await page.goto('/')
+
+  const searchInput = page.getByLabel('Search by name')
+  await searchInput.fill('test')
+
+  const resetButton = page.getByRole('button', { name: 'Reset filters' })
+  await expect(resetButton).toBeVisible()
+
+  await resetButton.click()
+
+  await expect(searchInput).toHaveValue('')
 })

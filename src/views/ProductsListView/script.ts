@@ -55,7 +55,6 @@ export function useProductsList() {
       categories.value = result.categories
       usedFuzzySearch.value = result.usedFuzzySearch
     } catch (error: unknown) {
-      console.error('Failed to load products', error as Error)
 
       const maybeWithStatus = error as { response?: { status?: number } }
       const status = maybeWithStatus.response?.status
@@ -95,7 +94,7 @@ export function useProductsList() {
         suggestions.value = result.items
         areSuggestionsVisible.value = suggestions.value.length > 0
       } catch (error) {
-        console.error('Failed to load product suggestions', error as Error)
+
         clearSuggestions()
       }
     }, SEARCH_DEBOUNCE_MS)
