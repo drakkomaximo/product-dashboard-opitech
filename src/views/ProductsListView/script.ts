@@ -1,6 +1,6 @@
 import { ref, computed } from 'vue'
 import type { Product } from '@/domain/product'
-import { DEFAULT_PAGE_SIZE } from '@/config/constants'
+import { DEFAULT_PAGE_SIZE, SEARCH_SUGGESTIONS_LIMIT, SEARCH_DEBOUNCE_MS } from '@/config/constants'
 import { AxiosProductsRepository } from '@/infrastructure/http/AxiosProductsRepository'
 import { GetProductsUseCase } from '@/application/use-cases/GetProductsUseCase'
 
@@ -16,7 +16,6 @@ function getProductsErrorMessage(status?: number): string {
 }
 
 export function useProductsList() {
-
   const products = ref<Product[]>([])
   const total = ref(0)
   const categories = ref<string[]>([])
@@ -29,6 +28,10 @@ export function useProductsList() {
 
   const searchTerm = ref('')
   const selectedCategory = ref<string | null>(null)
+
+  const suggestions = ref<Product[]>([])
+  const areSuggestionsVisible = ref(false)
+  let suggestionsDebounceTimeout: number | undefined
 
   const totalPages = computed(() => {
     if (total.value === 0) return 1
@@ -63,6 +66,41 @@ export function useProductsList() {
     }
   }
 
+  function clearSuggestions() {
+    suggestions.value = []
+    areSuggestionsVisible.value = false
+  }
+
+  function loadSuggestions(term: string) {
+    const query = term.trim()
+
+    if (suggestionsDebounceTimeout !== undefined) {
+      window.clearTimeout(suggestionsDebounceTimeout)
+      suggestionsDebounceTimeout = undefined
+    }
+
+    if (query.length < 2) {
+      clearSuggestions()
+      return
+    }
+
+    suggestionsDebounceTimeout = window.setTimeout(async () => {
+      try {
+        const result = await getProductsUseCase.execute({
+          page: 1,
+          pageSize: SEARCH_SUGGESTIONS_LIMIT,
+          searchTerm: query,
+          category: selectedCategory.value || undefined,
+        })
+        suggestions.value = result.items
+        areSuggestionsVisible.value = suggestions.value.length > 0
+      } catch (error) {
+        console.error('Failed to load product suggestions', error as Error)
+        clearSuggestions()
+      }
+    }, SEARCH_DEBOUNCE_MS)
+  }
+
   function goToPreviousPage() {
     if (page.value <= 1) return
     page.value -= 1
@@ -86,7 +124,11 @@ export function useProductsList() {
     pageSize,
     searchTerm,
     selectedCategory,
+    suggestions,
+    areSuggestionsVisible,
     totalPages,
+    loadSuggestions,
+    clearSuggestions,
     goToPreviousPage,
     goToNextPage,
     loadProducts,
