@@ -11,58 +11,30 @@
       </div>
     </header>
 
-    <div v-if="isLoading" class="grid place-items-center py-16 text-slate-400">
-      <span>Loading products...</span>
-    </div>
+    <ProductsFilters :search-term="searchTerm" :selected-category="selectedCategory" :categories="categories"
+      @update:search-term="onSearchTermChange" @update:selected-category="onCategoryChange" />
 
-    <div v-else-if="errorMessage" class="rounded-md border border-red-500/40 bg-red-950/40 px-4 py-3 text-sm">
+    <LoadingState v-if="isLoading" label="Loading products..." />
+
+    <AlertMessage v-else-if="errorMessage" variant="error">
       {{ errorMessage }}
-    </div>
+    </AlertMessage>
 
     <div v-else class="space-y-6">
-      <div v-if="products.length === 0"
-        class="rounded-md border border-slate-800 bg-slate-900/60 px-4 py-10 text-center text-sm text-slate-400">
-        No products found.
-      </div>
+      <ProductsGrid :products="products" />
 
-      <div v-else class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <article v-for="product in products" :key="product.id"
-          class="flex flex-col overflow-hidden rounded-lg border border-slate-800 bg-slate-900/60">
-          <div class="aspect-4/3 bg-slate-900">
-            <img :src="product.image" :alt="product.title" class="h-full w-full object-cover" loading="lazy" />
-          </div>
-          <div class="flex flex-1 flex-col gap-2 px-4 py-3">
-            <h3 class="line-clamp-2 text-sm font-medium leading-snug">{{ product.title }}</h3>
-            <p class="text-xs text-slate-400">{{ product.category }}</p>
-            <p class="mt-auto text-base font-semibold text-sky-400">
-              {{ product.price.toLocaleString('en-US', { style: 'currency', currency: 'USD' }) }}
-            </p>
-          </div>
-        </article>
-      </div>
-
-      <footer class="flex items-center justify-between border-t border-slate-800 pt-4 text-sm text-slate-300">
-        <div>
-          Page {{ page }} of {{ totalPages }}
-        </div>
-        <div class="flex gap-2">
-          <button type="button"
-            class="rounded-md border border-slate-700 px-3 py-1 disabled:cursor-not-allowed disabled:opacity-50"
-            :disabled="page <= 1 || isLoading" @click="goToPreviousPage">
-            Previous
-          </button>
-          <button type="button"
-            class="rounded-md border border-slate-700 px-3 py-1 disabled:cursor-not-allowed disabled:opacity-50"
-            :disabled="page >= totalPages || isLoading" @click="goToNextPage">
-            Next
-          </button>
-        </div>
-      </footer>
+      <PaginationControls :page="page" :total-pages="totalPages" :disabled="isLoading" @previous="goToPreviousPage"
+        @next="goToNextPage" />
     </div>
   </section>
 </template>
 
 <script setup lang="ts">
+import AlertMessage from '@/components/ui/AlertMessage.vue'
+import LoadingState from '@/components/ui/LoadingState.vue'
+import ProductsGrid from '@/components/products/ProductsGrid.vue'
+import PaginationControls from '@/components/ui/PaginationControls.vue'
+import ProductsFilters from '@/components/products/ProductsFilters.vue'
 import { useProductsList } from './script'
 
 defineOptions({
@@ -72,11 +44,27 @@ defineOptions({
 const {
   products,
   total,
+  categories,
   isLoading,
   errorMessage,
   page,
+  searchTerm,
+  selectedCategory,
   totalPages,
   goToPreviousPage,
   goToNextPage,
+  loadProducts,
 } = useProductsList()
+
+function onSearchTermChange(value: string) {
+  searchTerm.value = value
+  page.value = 1
+  void loadProducts()
+}
+
+function onCategoryChange(value: string | null) {
+  selectedCategory.value = value
+  page.value = 1
+  void loadProducts()
+}
 </script>
