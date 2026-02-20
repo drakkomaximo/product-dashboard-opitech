@@ -5,6 +5,7 @@ export interface ProductsRepository {
     items: Product[]
     total: number
     categories: string[]
+    usedFuzzySearch: boolean
   }>
   getProductById(id: ProductId): Promise<Product>
 }

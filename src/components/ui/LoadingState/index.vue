@@ -5,11 +5,15 @@
 </template>
 
 <script setup lang="ts">
-import { toRefs } from 'vue'
+import { useLoadingStateScript } from './script'
 
 const props = defineProps<{
   label: string
 }>()
 
-const { label } = toRefs(props)
+const { label } = useLoadingStateScript(props)
+
+defineOptions({
+  name: 'LoadingState',
+})
 </script>

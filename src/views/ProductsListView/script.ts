@@ -1,4 +1,4 @@
-import { onMounted, ref, computed } from 'vue'
+import { ref, computed } from 'vue'
 import type { Product } from '@/domain/product'
 import { DEFAULT_PAGE_SIZE } from '@/config/constants'
 import { AxiosProductsRepository } from '@/infrastructure/http/AxiosProductsRepository'
@@ -13,6 +13,7 @@ export function useProductsList() {
   const categories = ref<string[]>([])
   const isLoading = ref(false)
   const errorMessage = ref<string | null>(null)
+  const usedFuzzySearch = ref(false)
 
   const page = ref(1)
   const pageSize = ref(DEFAULT_PAGE_SIZE)
@@ -40,9 +41,18 @@ export function useProductsList() {
       products.value = result.items
       total.value = result.total
       categories.value = result.categories
+      usedFuzzySearch.value = result.usedFuzzySearch
     } catch (error: unknown) {
       console.error('Failed to load products', error as Error)
-      errorMessage.value = 'Failed to load products. Please try again.'
+
+      const maybeWithStatus = error as { response?: { status?: number } }
+      const status = maybeWithStatus.response?.status
+
+      if (status && status >= 500) {
+        errorMessage.value = 'There was a server error while loading products. Please try again.'
+      } else {
+        errorMessage.value = 'Failed to load products. Please check your connection and try again.'
+      }
     } finally {
       isLoading.value = false
     }
@@ -60,16 +70,13 @@ export function useProductsList() {
     void loadProducts()
   }
 
-  onMounted(() => {
-    void loadProducts()
-  })
-
   return {
     products,
     total,
     categories,
     isLoading,
     errorMessage,
+    usedFuzzySearch,
     page,
     pageSize,
     searchTerm,

@@ -31,7 +31,15 @@ export function useProductDetail() {
       product.value = await getProductDetailUseCase.execute(id)
     } catch (error: unknown) {
       console.error('Failed to load product details', error as Error)
-      errorMessage.value = 'Failed to load product details. Please try again.'
+
+      const maybeWithStatus = error as { response?: { status?: number } }
+      const status = maybeWithStatus.response?.status
+
+      if (status && status >= 500) {
+        errorMessage.value = 'There was a server error while loading this product. Please try again.'
+      } else {
+        errorMessage.value = 'Failed to load product details. Please check your connection and try again.'
+      }
       product.value = null
     } finally {
       isLoading.value = false
