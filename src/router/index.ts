@@ -15,6 +15,15 @@ const router = createRouter({
       component: () => import('@/views/ProductDetailView/index.vue'),
       props: true,
     },
+    {
+      path: '/not-found',
+      name: ROUTE_NAMES.notFound,
+      component: () => import('@/views/NotFoundView/index.vue'),
+    },
+    {
+      path: '/:pathMatch(.*)*',
+      redirect: { name: ROUTE_NAMES.notFound },
+    },
   ],
 })
 

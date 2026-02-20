@@ -1,6 +1,7 @@
 import { ref, watch } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import type { Product } from '@/domain/product'
+import { ROUTE_NAMES } from '@/config/constants'
 import { AxiosProductsRepository } from '@/infrastructure/http/AxiosProductsRepository'
 import { GetProductDetailUseCase } from '@/application/use-cases/GetProductDetailUseCase'
 
@@ -17,6 +18,7 @@ function getProductDetailErrorMessage(status?: number): string {
 
 export function useProductDetail() {
   const route = useRoute()
+  const router = useRouter()
 
   const product = ref<Product | null>(null)
   const isLoading = ref(false)
@@ -28,7 +30,7 @@ export function useProductDetail() {
     const id = Number(idParam)
 
     if (!Number.isFinite(id)) {
-      errorMessage.value = 'Invalid product id.'
+      await router.replace({ name: ROUTE_NAMES.notFound })
       return
     }
 
@@ -42,6 +44,11 @@ export function useProductDetail() {
 
       const maybeWithStatus = error as { response?: { status?: number } }
       const status = maybeWithStatus.response?.status
+
+      if (status === 404) {
+        await router.replace({ name: ROUTE_NAMES.notFound })
+        return
+      }
 
       errorMessage.value = getProductDetailErrorMessage(status)
       product.value = null
@@ -62,5 +69,6 @@ export function useProductDetail() {
     product,
     isLoading,
     errorMessage,
+    loadProduct,
   }
 }
