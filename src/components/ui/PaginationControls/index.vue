@@ -22,7 +22,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, toRefs } from 'vue'
+import { usePaginationControlsScript } from './script'
 
 const props = defineProps<{
   page: number
@@ -30,6 +30,9 @@ const props = defineProps<{
   disabled?: boolean
 }>()
 
-const { page, totalPages, disabled: disabledProp } = toRefs(props)
-const isDisabled = computed(() => disabledProp?.value ?? false)
+const { page, totalPages, isDisabled } = usePaginationControlsScript(props)
+
+defineOptions({
+  name: 'PaginationControls',
+})
 </script>

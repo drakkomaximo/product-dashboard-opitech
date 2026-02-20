@@ -20,9 +20,9 @@
 </template>
 
 <script setup lang="ts">
-import AlertMessage from '@/components/ui/AlertMessage.vue'
-import LoadingState from '@/components/ui/LoadingState.vue'
-import ProductDetailLayout from '@/components/layouts/ProductDetailLayout.vue'
+import AlertMessage from '@/components/ui/AlertMessage/index.vue'
+import LoadingState from '@/components/ui/LoadingState/index.vue'
+import ProductDetailLayout from '@/components/layouts/ProductDetailLayout/index.vue'
 import { useProductDetail } from './script'
 
 defineOptions({

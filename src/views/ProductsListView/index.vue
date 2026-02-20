@@ -14,28 +14,40 @@
     <ProductsFilters :search-term="searchTerm" :selected-category="selectedCategory" :categories="categories"
       @update:search-term="onSearchTermChange" @update:selected-category="onCategoryChange" />
 
-    <LoadingState v-if="isLoading" label="Loading products..." />
+    <p v-if="usedFuzzySearch && searchTerm" class="text-xs text-slate-400">
+      Showing results similar to "{{ searchTerm }}".
+    </p>
 
-    <AlertMessage v-else-if="errorMessage" variant="error">
-      {{ errorMessage }}
-    </AlertMessage>
+    <Transition name="fade" mode="out-in">
+      <template v-if="isLoading">
+        <ProductsGridSkeleton />
+      </template>
 
-    <div v-else class="space-y-6">
-      <ProductsGrid :products="products" />
+      <AlertMessage v-else-if="errorMessage" variant="error">
+        {{ errorMessage }}
+      </AlertMessage>
 
-      <PaginationControls :page="page" :total-pages="totalPages" :disabled="isLoading" @previous="goToPreviousPage"
-        @next="goToNextPage" />
-    </div>
+      <div v-else class="space-y-6">
+        <ProductsGrid :products="products" />
+
+        <PaginationControls v-if="total > 0" :page="page" :total-pages="totalPages" :disabled="isLoading"
+          @previous="onPreviousPage" @next="onNextPage" />
+      </div>
+    </Transition>
+
+    <ScrollToTopButton />
   </section>
 </template>
 
 <script setup lang="ts">
-import AlertMessage from '@/components/ui/AlertMessage.vue'
-import LoadingState from '@/components/ui/LoadingState.vue'
-import ProductsGrid from '@/components/products/ProductsGrid.vue'
-import PaginationControls from '@/components/ui/PaginationControls.vue'
-import ProductsFilters from '@/components/products/ProductsFilters.vue'
+import AlertMessage from '@/components/ui/AlertMessage/index.vue'
+import ProductsGrid from '@/components/products/ProductsGrid/index.vue'
+import PaginationControls from '@/components/ui/PaginationControls/index.vue'
+import ProductsFilters from '@/components/products/ProductsFilters/index.vue'
+import ProductsGridSkeleton from '@/components/products/ProductsGridSkeleton/index.vue'
+import ScrollToTopButton from '@/components/ui/ScrollToTopButton/index.vue'
 import { useProductsList } from './script'
+import { useProductsListQuery } from './useProductsListQuery'
 
 defineOptions({
   name: 'ProductsListView',
@@ -47,6 +59,7 @@ const {
   categories,
   isLoading,
   errorMessage,
+  usedFuzzySearch,
   page,
   searchTerm,
   selectedCategory,
@@ -56,15 +69,45 @@ const {
   loadProducts,
 } = useProductsList()
 
+const {
+  handleSearchChange,
+  handleCategoryChange,
+  handlePreviousPage,
+  handleNextPage,
+} = useProductsListQuery(
+  page,
+  searchTerm,
+  selectedCategory,
+  loadProducts,
+  goToPreviousPage,
+  goToNextPage,
+)
+
 function onSearchTermChange(value: string) {
-  searchTerm.value = value
-  page.value = 1
-  void loadProducts()
+  handleSearchChange(value)
 }
 
 function onCategoryChange(value: string | null) {
-  selectedCategory.value = value
-  page.value = 1
-  void loadProducts()
+  handleCategoryChange(value)
+}
+
+function onPreviousPage() {
+  handlePreviousPage()
+}
+
+function onNextPage() {
+  handleNextPage()
 }
 </script>
+
+<style scoped>
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.2s ease-out;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+</style>

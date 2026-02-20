@@ -15,9 +15,13 @@
 
 <script setup lang="ts">
 import type { Product } from '@/domain/product'
-import ProductCard from '@/components/products/ProductCard.vue'
+import ProductCard from '@/components/products/ProductCard/index.vue'
 
 defineProps<{
   products: Product[]
 }>()
+
+defineOptions({
+  name: 'ProductsGrid',
+})
 </script>
