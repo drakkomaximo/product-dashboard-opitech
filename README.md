@@ -27,13 +27,18 @@ This project was adapted from the base Vue 3 + Vite template to include:
 
 ## API and Data Source
 
-For this technical test the application consumes a **fake API** instead of a real production backend. This approach was chosen to:
+For this technical test the application consumes data from **https://fakestoreapi.com/** (a public fake store API) instead of a real production backend. This approach was chosen to:
 
 - Keep the project **self-contained**, without external dependencies or credentials.
 - Have **deterministic data** that makes unit and end-to-end tests more stable and reproducible.
 - Simulate realistic behaviors such as **server errors** and **search/fuzzy filtering** without needing changes on a real API.
 
 The Axios-based repository (`AxiosProductsRepository`) encapsulates all calls to the fake API and applies filtering, fuzzy search and pagination on top of that data.
+
+The API base URL and endpoints are defined through configuration and environment variables (see `config/constants.ts` and `.env.template`). This means that in a future real scenario you can:
+
+- Point the repository to a **real backend** simply by changing the base URL and paths in configuration/env.
+- Keep the same **domain models, use-cases and views**, only swapping the underlying HTTP implementation.
 
 ---
 
