@@ -25,6 +25,18 @@ This project was adapted from the base Vue 3 + Vite template to include:
 
 ---
 
+## API and Data Source
+
+For this technical test the application consumes a **fake API** instead of a real production backend. This approach was chosen to:
+
+- Keep the project **self-contained**, without external dependencies or credentials.
+- Have **deterministic data** that makes unit and end-to-end tests more stable and reproducible.
+- Simulate realistic behaviors such as **server errors** and **search/fuzzy filtering** without needing changes on a real API.
+
+The Axios-based repository (`AxiosProductsRepository`) encapsulates all calls to the fake API and applies filtering, fuzzy search and pagination on top of that data.
+
+---
+
 ## Project Structure (high level)
 
 - `src/domain` – Core domain models (e.g. `product.ts`).
@@ -36,6 +48,29 @@ This project was adapted from the base Vue 3 + Vite template to include:
 - `src/components` – UI components (grid, filters, pagination, scroll-to-top, etc.).
 - `src/__tests__` – Unit tests mirroring the application structure.
 - `e2e` – Playwright end-to-end tests for core user flows.
+
+---
+
+## Architecture / Flow Diagram
+
+The following diagram summarizes the main data flow for both the products list and product detail:
+
+```mermaid
+flowchart LR
+  A[User / Browser] --> B[Vue Router]
+  B --> C[ProductsListView / ProductDetailView]
+  C --> D[Composables\nuseProductsList / useProductDetail / useProductsListQuery]
+  D --> E[Application Layer\nGetProductsUseCase / GetProductDetailUseCase]
+  E --> F[Infrastructure Layer\nAxiosProductsRepository]
+  F --> G[Fake API / HTTP Client]
+  G --> F
+  F --> E
+  E --> D
+  D --> C
+  C --> A
+```
+
+This shows how views stay thin and delegate work to composables, which in turn use application use-cases and the HTTP repository to retrieve and filter data from the fake API.
 
 ---
 
@@ -183,6 +218,14 @@ For Netlify, the common configuration is:
 - **Publish directory:** `dist`
 
 Make sure to configure any environment variables (e.g. API URLs) through the provider's UI rather than hardcoding them.
+
+---
+
+## Production URL
+
+The current production deployment of this project is available at:
+
+- https://product-dashboard-opitech.netlify.app/
 
 ---
 
